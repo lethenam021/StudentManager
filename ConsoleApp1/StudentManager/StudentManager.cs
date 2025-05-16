@@ -46,7 +46,8 @@ internal class StudentManager
         return new Student(name, // Nếu ConstValue.MinYearBirth thực sự là định dạng ngày tháng (ví dụ: "yyyy")
             DateTime.ParseExact(birthdate, ConstValue.FormatBirth.ToString(), CultureInfo.InvariantCulture),
             address, double.Parse(height), double.Parse(weight), schoolStudent,
-            int.Parse(yearStart), double.Parse(gpa));
+            int.Parse(yearStart),     double.Parse(gpa, CultureInfo.InvariantCulture)); 
+
 
     }
 
@@ -75,7 +76,8 @@ internal class StudentManager
         Student studentFound = getStudentById(idExist);
         if (studentFound == null)
         {
-            Console.WriteLine("Student not found");
+            Console.WriteLine("Student not found or Id not valid");
+            return;
         }
 
         Console.WriteLine(studentFound.ToString() + "\n");
@@ -85,11 +87,12 @@ internal class StudentManager
 //updateStudent
     public void UpdateStudentById()
     {
-        int idExist = int.Parse(getInput("Please enter ID:", Validation.CheckGenerateId));
+        int idExist = int.Parse(getInput("Please enter ID:", Validation.CheckGenerateId)+"\n");
         Student studentUpdated = getStudentById(idExist);
         if (studentUpdated == null)
         {
             Console.WriteLine("Student not found");
+            return;
         }
 
         Student updateStudent = InputStudent();
@@ -141,7 +144,9 @@ internal class StudentManager
         foreach (Student student in students)
         {
             Console.WriteLine(student.ToString() + "\n");
+            
         }
+        Console.WriteLine($"List have : {students.Count} students");  
     }
 
 //DisplayLevelbyLevel
@@ -185,8 +190,7 @@ internal class StudentManager
 //displayLevelFromkeyboard
     public void DisplayLevelFromKeyBoard()
     {
-        while (true)
-        {
+        
             try
             {
                 string input = getInput("Please enter Level (Kem/Yeu/TrungBinh/Kha/Gioi/XuatSac):",
@@ -212,11 +216,10 @@ internal class StudentManager
             {
                 Console.WriteLine("Invalid input: Please enter a valid input.\n");
             }
-        }
+        
     }
 
 //storeData    
-
     public void StoreDataInFile()
     {
         try
@@ -243,18 +246,18 @@ internal class StudentManager
     }
 
     
-
+//readFile
     public List<Student> ReadJsonFile(string path)
     {
         try
         {
             if (File.Exists(FilePath))
             {
-                string json = File.ReadAllText(FilePath);
+                string json = File.ReadAllText(path);
                 students = JsonSerializer.Deserialize<List<Student>>(json);
                  Console.WriteLine("|-----------------------------|");
                  Console.WriteLine("|--Data loaded successfully.--|");
-                 Console.WriteLine("|-----------------------------|");
+                 Console.WriteLine("|-----------------------------|\n");
                  foreach (Student student in students)
                  {
                      Console.WriteLine(student.ToString() + "\n");
@@ -269,12 +272,13 @@ internal class StudentManager
         catch (Exception e)
         {
             Console.WriteLine($"Error: Cannot load file - {e.Message}");
+            return null;
         }
         return  students;
     }
-
-public string getInput(string promt, Func<string, Response> validator)
-    {
+//getInput
+       public string getInput(string promt, Func<string, Response> validator)
+       {
         string input=null;
         while (true)
         {
@@ -284,7 +288,6 @@ public string getInput(string promt, Func<string, Response> validator)
             if(resultresponse.Success)
                 return input;
                 Console.WriteLine(resultresponse.ToString());
-            
         }
-    }
+      }
 }

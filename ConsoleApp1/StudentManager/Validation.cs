@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-
+using System.Globalization;
 namespace ConsoleApp1;
 
 public class Validation
@@ -16,7 +16,12 @@ public class Validation
         {
             return new Response(false,"Not an integer");
         }
-        return convertId <= 0 
+
+        if (convertId != int.Parse(id))
+        {
+            return new Response(false,"Not a valid id");
+        }
+        return convertId < 0  
             ? new Response(false,"Id must integer") 
             : new Response(true,"");
     }
@@ -95,7 +100,7 @@ public class Validation
 
         if (heightConverted < ConstValue.MinHeight || heightConverted > ConstValue.MaxHeight)
         {
-            return new Response(false,"Height must be between" + ConstValue.MinHeight+ "and " + ConstValue.MaxHeight);
+            return new Response(false,"Height must be between " + ConstValue.MinHeight+ " and " + ConstValue.MaxHeight);
         }
         return new Response(true,"");
     }
@@ -104,7 +109,7 @@ public class Validation
     {
         if (string.IsNullOrEmpty(weightString.ToString()) || string.IsNullOrWhiteSpace(weightString.ToString()))
         {
-            return new Response(false,"Weight must be a string");
+            return new Response(false,"Not null or Whitespace or Empty");
         }
 
         if (!double.TryParse(weightString.ToString(), out var weightConverted))
@@ -114,7 +119,7 @@ public class Validation
 
         if (weightConverted < ConstValue.MinWeight || weightConverted > ConstValue.MaxWeight)
         {
-            return new Response(false,"Weight must be between" + ConstValue.MinWeight+ "and " + ConstValue.MaxWeight);
+            return new Response(false,"Weight must be between " + ConstValue.MinWeight+ "and " + ConstValue.MaxWeight);
         }
         return new Response(true,"");
     }
@@ -146,7 +151,7 @@ public class Validation
             ?new Response(false,"school max length <" + ConstValue.MaxLengthSchool)
             :new Response(true,school);
     }
-    //checkSchool
+    //checkStartyear
     public static Response CheckStartYearInput(string yearStart)
     {
         if (string.IsNullOrEmpty(yearStart.ToString()) || string.IsNullOrWhiteSpace(yearStart.ToString()))
@@ -154,38 +159,41 @@ public class Validation
             return new Response(false,"Not null or Whitespace or Empty");
         }
 
-        if (yearStart.Length != ConstValue.LengthStartStudy)
+        if (yearStart.Length != ConstValue.LengthStartStudy || !int.TryParse(yearStart.ToString(), out var yearConverted)) 
         {
-            return new Response(false,"Start year length=" + ConstValue.LengthStartStudy);
+            return new Response(false,"Start year length= " + ConstValue.LengthStartStudy+ " and an integer " );
         }
-        if(!int.TryParse(yearStart.ToString(), out var yearConverted))
-        {
-            return new Response(false,"Start year must be an integer");
-        }
+      
 
        
         return yearConverted < ConstValue.StartStudy || yearConverted > ConstValue.YearNow
-            ? new Response(false,"Year start must be from: "+ConstValue.StartStudy+"to"+ConstValue.YearNow)
+            ? new Response(false,"Year start must be from: "+ConstValue.StartStudy+" to "+ConstValue.YearNow)
             : new Response(true,"");
     }
     //checkGPA
     public static Response CheckGPAInput(string gpaString)
     {
-        if (string.IsNullOrEmpty(gpaString.ToString()) || string.IsNullOrWhiteSpace(gpaString.ToString()))
+        if (string.IsNullOrEmpty(gpaString) || string.IsNullOrWhiteSpace(gpaString))
         {
-            return new Response(false,"Not null or Whitespace or Empty");
+            return new Response(false, "GPA cannot be empty or whitespace");
         }
 
-        if (!double.TryParse(gpaString.ToString(), out var gpaConverted))
+        // Try parsing with invariant culture to handle decimal points correctly
+        if (!double.TryParse(
+                gpaString.Trim(),
+                NumberStyles.Any,
+                CultureInfo.InvariantCulture,
+                out var gpaConverted))
         {
-            return new Response(false,"GPA must be a number");
+            return new Response(false, "GPA must be a number (use . as decimal separator)");
         }
 
         if (gpaConverted < ConstValue.MinGPA || gpaConverted > ConstValue.MaxGPA)
         {
-            return new Response(false,"GPA must be between" + ConstValue.MinGPA+ " and " + ConstValue.MaxGPA);
+            return new Response(false, $"GPA must be between {ConstValue.MinGPA} and {ConstValue.MaxGPA}");
         }
-        return new Response(true,"");
+    
+        return new Response(true, "");
     }
     //checkLevel
     public static Response CheckLevelInput(string level)

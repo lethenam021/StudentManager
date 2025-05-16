@@ -48,6 +48,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;.NET Project.ConsoleApp1.executor&quot;: &quot;Run&quot;,
+    &quot;.NET Project.StudentManager.executor&quot;: &quot;Run&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -98,7 +99,7 @@
       <workItem from="1747212226827" duration="3430000" />
       <workItem from="1747233897010" duration="1341000" />
       <workItem from="1747271412564" duration="8561000" />
-      <workItem from="1747292714789" duration="251000" />
+      <workItem from="1747292714789" duration="11173000" />
     </task>
     <servers />
   </component>

@@ -24,12 +24,14 @@ using System.Globalization;
         this.YearStart = YearStart;
         this.GPA = GPA;
         StudentCode = GetStudentCode();
-        Level = GetLevel();
+       // Level = GetLevel();
     }
 
     
     [JsonConverter(typeof(JsonStringEnumConverter))] 
-    public StudentLevel Level { get; }
+    [JsonIgnore]
+    public StudentLevel Level => GetLevel();
+
 
     public enum StudentLevel
     {
