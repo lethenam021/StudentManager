@@ -2,9 +2,9 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 namespace ConsoleApp1;
 
-public class Validation
+public static class Validation
 {
-    //checkGennerateId
+    //checkGenerateId
     public static Response CheckGenerateId(string id)
     {
         if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(id.Trim()) || string.IsNullOrWhiteSpace(id))
@@ -88,12 +88,12 @@ public class Validation
     //checkHeight
     public static Response CheckHeightInput(string heightString)
     {
-        if (string.IsNullOrEmpty(heightString.ToString()) || string.IsNullOrWhiteSpace(heightString.ToString()))
+        if (string.IsNullOrEmpty(heightString) || string.IsNullOrWhiteSpace(heightString))
         {
             return new Response(false,"Height must be a string");
         }
 
-        if (!double.TryParse(heightString.ToString(), out var heightConverted))
+        if (!double.TryParse(heightString, out var heightConverted))
         {
             return new Response(false,"Height must be a number");
         }
@@ -107,12 +107,12 @@ public class Validation
     //checkWeightInput
     public static Response CheckWeightInput(string weightString)
     {
-        if (string.IsNullOrEmpty(weightString.ToString()) || string.IsNullOrWhiteSpace(weightString.ToString()))
+        if (string.IsNullOrEmpty(weightString) || string.IsNullOrWhiteSpace(weightString))
         {
             return new Response(false,"Not null or Whitespace or Empty");
         }
 
-        if (!double.TryParse(weightString.ToString(), out var weightConverted))
+        if (!double.TryParse(weightString, out var weightConverted))
         {
             return new Response(false,"Weight must be a number");
         }
@@ -123,23 +123,7 @@ public class Validation
         }
         return new Response(true,"");
     }
-    //checkStudentCode
-    internal static Response CheckStudentCodeInput(string studentId, IEnumerable<Student> students)
-    {
-        if (string.IsNullOrEmpty(studentId.ToString()) || string.IsNullOrWhiteSpace(studentId.ToString()))
-        {
-            return new Response(false,"Not null or Whitespace or Empty");
-        }
-
-        if (studentId.Length > ConstValue.MaxLengthStudentCode)
-        {
-            return new Response(false,"Max length student code: " + ConstValue.MaxLengthStudentCode);
-        }
-        var existStudentcode = students.FirstOrDefault(x => x != null && x.StudentCode == studentId.ToString());
-        return existStudentcode != null 
-            ? new Response(false,"Student was existed") 
-            : new Response(true,"");
-    }
+   
     //checkSchool
     public static Response CheckSchoolInput(string school)
     {
@@ -151,15 +135,15 @@ public class Validation
             ?new Response(false,"school max length <" + ConstValue.MaxLengthSchool)
             :new Response(true,school);
     }
-    //checkStartyear
+    //checksStartYear
     public static Response CheckStartYearInput(string yearStart)
     {
-        if (string.IsNullOrEmpty(yearStart.ToString()) || string.IsNullOrWhiteSpace(yearStart.ToString()))
+        if (string.IsNullOrEmpty(yearStart) || string.IsNullOrWhiteSpace(yearStart))
         {
             return new Response(false,"Not null or Whitespace or Empty");
         }
 
-        if (yearStart.Length != ConstValue.LengthStartStudy || !int.TryParse(yearStart.ToString(), out var yearConverted)) 
+        if (yearStart.Length != ConstValue.LengthStartStudy || !int.TryParse(yearStart, out var yearConverted)) 
         {
             return new Response(false,"Start year length= " + ConstValue.LengthStartStudy+ " and an integer " );
         }
@@ -171,7 +155,7 @@ public class Validation
             : new Response(true,"");
     }
     //checkGPA
-    public static Response CheckGPAInput(string gpaString)
+    public static Response CheckGpaInput(string gpaString)
     {
         if (string.IsNullOrEmpty(gpaString) || string.IsNullOrWhiteSpace(gpaString))
         {
@@ -188,9 +172,9 @@ public class Validation
             return new Response(false, "GPA must be a number (use . as decimal separator)");
         }
 
-        if (gpaConverted < ConstValue.MinGPA || gpaConverted > ConstValue.MaxGPA)
+        if (gpaConverted < ConstValue.MinGpa || gpaConverted > ConstValue.MaxGpa)
         {
-            return new Response(false, $"GPA must be between {ConstValue.MinGPA} and {ConstValue.MaxGPA}");
+            return new Response(false, $"GPA must be between {ConstValue.MinGpa} and {ConstValue.MaxGpa}");
         }
     
         return new Response(true, "");
@@ -198,7 +182,7 @@ public class Validation
     //checkLevel
     public static Response CheckLevelInput(string level)
     {
-        if (string.IsNullOrEmpty(level.ToString()) || string.IsNullOrWhiteSpace(level.ToString()))
+        if (string.IsNullOrEmpty(level) || string.IsNullOrWhiteSpace(level))
         {
             return new Response(false,"Not null or Whitespace or Empty");
         }
@@ -209,17 +193,5 @@ public class Validation
         return new Response(true,"");
     }
 
-    public static Response CheckChoiceInput(string choice)
-    {
-        if (string.IsNullOrEmpty(choice.ToString()) || string.IsNullOrWhiteSpace(choice.ToString()))
-        {
-            return new Response(false,"Not null or Whitespace or Empty");
-        }
 
-        if (!Regex.IsMatch(choice.ToString(), @"^[1-9\s\-_]+$"))
-        {
-            return new Response(false,"Invalid choice");
-        }
-        return new Response(true,"");
-    }
 }

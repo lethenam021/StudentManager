@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿
 
 namespace ConsoleApp1
 {
@@ -40,13 +39,13 @@ namespace ConsoleApp1
                 studentManager.DeleteStudentById();
                 break;
             case 5:
-                studentManager.DisplayLevelbyPercent();
+                studentManager.DisplayLevelByPercent();
                 break;
             case 6:
-                studentManager.DisplayGPAbyPercent();
+                studentManager.DisplayGpaByPercent();
                 break;
             case 7:
-                studentManager.DisplayLevelFromKeyBoard();
+                studentManager.DisplayLevelFromKeyboard();
                 break;
             case 8:
                 studentManager.StoreDataInFile();
@@ -56,7 +55,13 @@ namespace ConsoleApp1
                 break;
             case 10:
                 Console.Write("Enter the path to the JSON file (e.g., C:\\data\\students.json): ");
-                string jsonPath = Console.ReadLine();
+                string? inputPath= Console.ReadLine();
+                if (inputPath == null)
+                {
+                    Console.WriteLine("Input cannot be null.");
+                    return;
+                }
+                string jsonPath = inputPath;
                 if (string.IsNullOrWhiteSpace(jsonPath))
                 {
                     Console.WriteLine("File path cannot be empty!");
@@ -64,8 +69,14 @@ namespace ConsoleApp1
                 else
                 {
                     try
-                    {
-                        List<Student> studentsFromFile = studentManager.ReadJsonFile(jsonPath);
+                    { 
+                        var result = studentManager.ReadJsonFile(jsonPath);
+                        if (result == null)
+                        {
+                            Console.WriteLine("Failed to read students from file.");
+                            return;
+                        }
+                        List<Student> studentsFromFile = result;
                         Console.WriteLine($"Successfully loaded {studentsFromFile.Count} students from file.");
                     }
                     catch (Exception ex)
@@ -83,9 +94,7 @@ namespace ConsoleApp1
                     Console.WriteLine("Exiting program...");
                 }
                 break;
-            default:
-                Console.WriteLine("Invalid choice. Please try again.");
-                break;
+          
         }
 
         if (!exit)
@@ -108,7 +117,7 @@ namespace ConsoleApp1
             Console.WriteLine("|-- 4. Delete student by Id ------------------------|");
             Console.WriteLine("|-- 5. Display student list by Level ---------------|");
             Console.WriteLine("|-- 6. Display student list by GPA -----------------|");
-            Console.WriteLine("|-- 7. Display student with enter GPA from keyborad |");
+            Console.WriteLine("|-- 7. Display student with enter GPA from keyboard |");
             Console.WriteLine("|-- 8. Save list student ---------------------------|");
             Console.WriteLine("|-- 9. Display all students ------------------------|");
             Console.WriteLine("|-- 10. Read json file -----------------------------|");

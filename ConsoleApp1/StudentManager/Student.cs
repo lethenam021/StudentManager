@@ -1,90 +1,75 @@
-namespace ConsoleApp1;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Configuration;
-using System.Globalization;
- internal class Student : Person
- {
-     public static int StudentID = 0;
-     public string StudentCode { get; set; }
-    public string StudentSchool { get; set; }
-    public int YearStart { get; set; }
-    public double GPA { get; set; }
-    
-    
-    [JsonConstructor]
-    public Student(string Name, DateTime BirthDate, string Address, double Height, double Weight, 
-        string StudentSchool, int YearStart, double GPA)
-        : base(Name, BirthDate, Address, Height, Weight)
+   namespace ConsoleApp1
+{
+ 
+
+    internal class Student : Person
     {
-        Id = ++StudentID;
-        this.StudentSchool = StudentSchool;
-        this.YearStart = YearStart;
-        this.GPA = GPA;
-        StudentCode = GetStudentCode();
-       // Level = GetLevel();
-    }
+        public static int StudentId ;
+        public string StudentCode { get; set; }
+        public string StudentSchool { get; set; }
+        public int YearStart { get; set; }
+        public double Gpa { get; set; }
 
-    
-    [JsonConverter(typeof(JsonStringEnumConverter))] 
-    [JsonIgnore]
-    public StudentLevel Level => GetLevel();
+        [JsonIgnore]
+        public StudentLevel Level => GetLevel();
 
+        public enum StudentLevel
+        {
+            Kem,
+            Yeu,
+            TrungBinh,
+            Kha,
+            Gioi,
+            XuatSac
+        }
 
-    public enum StudentLevel
-    {
-        Kem,
-        Yeu,
-        TrungBinh,
-        Kha,
-        Gioi,
-        XuatSac
-    }
+        [JsonConstructor]
+        public Student(string name, DateTime birthDate, string address, double height, double weight,
+            string studentSchool, int yearStart, double gpa)
+            : base(name, birthDate, address, height, weight)
+        {
+            Id = ++StudentId;
+            StudentSchool = studentSchool;
+            YearStart = yearStart;
+            Gpa = gpa;
+            StudentCode = GetStudentCode();
+        }
 
-    public StudentLevel GetLevel()
-    {
-        if (GPA < 3)
-            return StudentLevel.Kem;
-        else if (GPA < 5)
-            return StudentLevel.Yeu;
-        else if (GPA < 6.5)
-            return StudentLevel.TrungBinh;
-        else if (GPA < 7.5)
-            return StudentLevel.Kha;
-        else if (GPA < 9)
-            return StudentLevel.Gioi;
-        else
+        private StudentLevel GetLevel()
+        {
+            if (Gpa < 3)
+                return StudentLevel.Kem;
+            if (Gpa < 5)
+                return StudentLevel.Yeu;
+            if (Gpa < 6.5)
+                return StudentLevel.TrungBinh;
+            if (Gpa < 7.5)
+                return StudentLevel.Kha;
+            if (Gpa < 9)
+                return StudentLevel.Gioi;
+            
             return StudentLevel.XuatSac;
+        }
+
+        private string GetStudentCode()
+        {
+            string code = YearStart.ToString() + Id.ToString();
+            
+            if (code.Length > ConstValue.MaxLengthStudentCode)
+                return code.Substring(code.Length - ConstValue.MaxLengthStudentCode);
+            
+            return code.PadLeft(ConstValue.MaxLengthStudentCode, '0');
+        }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, " +
+                   $"{nameof(StudentCode)}: {StudentCode}, " +
+                   $"{nameof(StudentSchool)}: {StudentSchool}, " +
+                   $"{nameof(YearStart)}: {YearStart}, " +
+                   $"{nameof(Gpa)}: {Gpa}, " +
+                   $"{nameof(Level)}: {Level}";
+        }
     }
-
-    public string GetStudentCode()
-    {
-        string code = YearStart.ToString() + StudentID.ToString();
-        if (code.Length > ConstValue.MaxLengthStudentCode)
-            return code.Substring(code.Length - ConstValue.MaxLengthStudentCode,
-                ConstValue.MaxLengthStudentCode);
-        return code.PadLeft(10, '0');
-
-    }
-
-
-
-    public override string ToString()
-    {
-        return $@"Id: {Id}
-Name: {Name}
-BirthDate: {BirthDate}
-Address: {Address}
-Height: {Height}cm
-Weight: {Weight}kg
-StudentCode: {StudentCode}
-StudentSchool: {StudentSchool}
-YearStart: {YearStart}
-GPA: {GPA}
-Level: {Level}";
-    }
-
-
- }
+}

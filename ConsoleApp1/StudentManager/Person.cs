@@ -9,24 +9,23 @@ internal class Person
     public double Height { get; set; }
     public double Weight { get; set; }
 
-    public Person(string _name, DateTime _birthDate, string _address, double _height, double _weight)
+    public Person(string name, DateTime birthDate, string address, double height, double weight)
     {
-        Name = _name;
-        BirthDate = _birthDate;
-        Address = _address;
-        Height = _height;
-        Weight = _weight;
+        Name = name;
+        BirthDate = birthDate;
+        Address = address;
+        Height = height;
+        Weight = weight;
     }
 
     public override string ToString()
     {
-        return $@"
-           Id: {Id},
-           Name: {Name},
-           BirthDate: {BirthDate},
-           Address: {Address},
-           Height: {Height},
-           Weight: {Weight}
-        }}";
+        return $"{nameof(Id)}: {Id}," +
+               $" {nameof(Name)}: {Name}, " +
+               $"{nameof(BirthDate)}: {BirthDate}, " +
+               $"{nameof(Address)}: {Address}," +
+               $" {nameof(Height)}: {Height}, " +
+               $"{nameof(Weight)}: {Weight}";
     }
 }
+

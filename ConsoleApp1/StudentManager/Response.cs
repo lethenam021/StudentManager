@@ -1,14 +1,9 @@
 namespace ConsoleApp1;
 
-public class Response
+public class Response(bool success, string message)
 { 
-    public bool Success { get; set; }
-    public string Message { get; set; }
+    public bool Success { get; set; } = success;
+    public string Message { get; set; } = message;
 
-    public Response(bool _success, string _message)
-    {
-        Success = _success;
-        Message = _message;
-    }
     public override string ToString() => Message;
 }

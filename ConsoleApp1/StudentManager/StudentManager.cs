@@ -1,293 +1,300 @@
-using System.Collections.Specialized;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
-using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
-
 using Microsoft.Extensions.Configuration;
 using System.Globalization;
-using System.Text.Json.Serialization;
+
+
+
 
 namespace ConsoleApp1;
 
 internal class StudentManager
 {
-    private readonly string filePath;
+    private readonly string _filePath;
+    private readonly List<Student> _students;
 
-    private List<Student> students = new List<Student>()
-    {
-        new Student("Le The Nam", new DateTime(2004, 8, 6), "Thanh Hoa", 172, 58, "Fpt", 2022, 7.0),
-        new Student("Le The Dat", new DateTime(2000, 12, 1), "Thanh Hoa", 172, 76, "PCCC", 2019, 7.0)
-    };
-
+  
     public StudentManager()
     {
         IConfiguration config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .Build();
-        
-        filePath = config["FilePath"] ?? throw new ArgumentNullException("FilePath not found in appsettings.json");
-    }
-    public string FilePath => filePath;
 
-    Student InputStudent()
-    {
-        string name = getInput("Please enter name:", Validation.CheckNameInput);
-        string birthdate = getInput("Please enter birth date:", Validation.CheckBirthDateInput);
-        string address = getInput("Please enter address:", Validation.CheckAddressInput);
-        string height = getInput("Please enter height:", Validation.CheckHeightInput);
-        string weight = getInput("Please enter weight:", Validation.CheckWeightInput);
-        string schoolStudent = getInput("Please enter school:", Validation.CheckSchoolInput);
-        string yearStart = getInput("Please enter yearStart:", Validation.CheckStartYearInput);
-        string gpa = getInput("Please enter GPA:", Validation.CheckGPAInput);
-
-        return new Student(name, // Nếu ConstValue.MinYearBirth thực sự là định dạng ngày tháng (ví dụ: "yyyy")
-            DateTime.ParseExact(birthdate, ConstValue.FormatBirth.ToString(), CultureInfo.InvariantCulture),
-            address, double.Parse(height), double.Parse(weight), schoolStudent,
-            int.Parse(yearStart),     double.Parse(gpa, CultureInfo.InvariantCulture)); 
-
-
-    }
-
-//addNewStudent
-    public void CreateStudent()
-    {
-        Student newStudent = InputStudent();
-        Console.WriteLine("|------------------------------------|");
-        Console.WriteLine("|--New student created successfully--|");
-        Console.WriteLine("|------------------------------------|");
-        Console.WriteLine(newStudent.ToString() + "\n");
-        students.Add(newStudent);
-        StoreDataInFile();
-    }
-
-//getStudentById
-    public Student getStudentById(int id)
-    {
-        return students.FirstOrDefault(x => x.Id == id);
-    }
-
-//searchStudentId
-    public void SearchStudentById()
-    {
-        int idExist = int.Parse(getInput("Please enter ID:", Validation.CheckGenerateId));
-        Student studentFound = getStudentById(idExist);
-        if (studentFound == null)
+        string? filePathFromConfig = config["FilePath"];
+        if (string.IsNullOrWhiteSpace(filePathFromConfig))
         {
-            Console.WriteLine("Student not found or Id not valid");
-            return;
+            throw new InvalidOperationException("Missing or empty 'FilePath'");
         }
 
-        Console.WriteLine(studentFound.ToString() + "\n");
+        _filePath = filePathFromConfig;
+        _students = InitializeDefaultStudents();
+    } 
 
-    }
+  // public string FilePath => _filePath;
 
-//updateStudent
-    public void UpdateStudentById()
-    {
-        int idExist = int.Parse(getInput("Please enter ID:", Validation.CheckGenerateId)+"\n");
-        Student studentUpdated = getStudentById(idExist);
-        if (studentUpdated == null)
-        {
-            Console.WriteLine("Student not found");
-            return;
-        }
-
-        Student updateStudent = InputStudent();
-        Student.StudentID--;
-        studentUpdated.Name = updateStudent.Name;
-        studentUpdated.BirthDate = updateStudent.BirthDate;
-        studentUpdated.Address = updateStudent.Address;
-        studentUpdated.Height = updateStudent.Height;
-        studentUpdated.Weight = updateStudent.Weight;
-        studentUpdated.StudentCode = updateStudent.StudentCode;
-        studentUpdated.GPA = updateStudent.GPA;
-        studentUpdated.YearStart = updateStudent.YearStart;
-        studentUpdated.StudentSchool = updateStudent.StudentSchool;
-        Console.WriteLine("|--------------------------------|");
-        Console.WriteLine("|--Updated student successfully--|");
-        Console.WriteLine("|--------------------------------|" + "\n");
-        Console.WriteLine("\n" + studentUpdated.ToString() + "\n");
-        StoreDataInFile();
-    }
-
-//deleteStudent
-    public void DeleteStudentById()
+  private static List<Student> InitializeDefaultStudents()
+  {
+      return
+      [
+          new Student("Le The Nam", new DateTime(2004, 8, 6), "Thanh Hoa", 172, 58, "Fpt", 2022, 7.0),
+          new Student("Le The Dat", new DateTime(2000, 12, 1), "Thanh Hoa", 172, 76, "PCA", 2019, 7.0)
+      ];
+  }
+    
+    /// The user for input and validates it using the provided validator.
+    private string GetInput(string prompt, Func<string, Response> validator)
     {
         while (true)
         {
-            int idExist = int.Parse(getInput("Please enter ID:", Validation.CheckGenerateId));
-            Student studentDeleted = getStudentById(idExist);
-            if (studentDeleted == null)
+            Console.Write(prompt);
+            string? input = Console.ReadLine()?.Trim();
+            if (!string.IsNullOrWhiteSpace(input))
             {
-                Console.WriteLine("Student not found");
+                  Response response = validator(input);
+                  if (response.Success) 
+                      return input;
+                  Console.WriteLine(response.Message);                             
+            } 
+        }
+    }
+
+    
+    /// Creates a new student by collecting input and adds it to the collection.
+    public void CreateStudent()
+    {
+        Student newStudent = InputStudent();
+        _students.Add(newStudent);
+        StoreDataInFile();
+        PrintSuccessMessage("New student created successfully", newStudent.ToString());
+    }
+
+    /// Retrieves a student by their ID.
+    private Student? GetStudentById(int id) => _students.FirstOrDefault(s => s.Id == id);
+
+    
+    /// Searches for a student by ID and displays their information.
+    public void SearchStudentById()
+    {
+        int id = int.Parse(GetInput("Please enter ID: ", Validation.CheckGenerateId));
+        Student? student = GetStudentById(id);
+
+        if (student == null)
+        {
+            Console.WriteLine("Student not found or ID not valid.");
+            return;
+        }
+
+        Console.WriteLine($"{student}\n");
+    }
+
+    
+    /// Updates an existing student's information by ID.
+    public void UpdateStudentById()
+    {
+        int id = int.Parse(GetInput("Please enter ID: ", Validation.CheckGenerateId));
+        Student? student = GetStudentById(id);
+
+        if (student == null)
+        {
+            Console.WriteLine("Student not found.");
+            return;
+        }
+
+        Student updatedStudent = InputStudent();
+        Student.StudentId--; 
+        UpdateStudentFields(student, updatedStudent);
+        StoreDataInFile();
+        PrintSuccessMessage("Updated student successfully", student.ToString());
+    }
+    
+    /// Deletes a student by ID.
+    public void DeleteStudentById()
+    {
+        int id = int.Parse(GetInput("Please enter ID: ", Validation.CheckGenerateId));
+        Student? student = GetStudentById(id);
+
+        if (student == null)
+        {
+            Console.WriteLine("Student not found.");
+            return;
+        }
+
+        Student.StudentId--;
+        _students.Remove(student);
+        StoreDataInFile();
+        PrintSuccessMessage("Deleted student successfully");
+        DisplayAllStudents();
+    }
+    
+    /// Displays all students in the collection.
+    public void DisplayAllStudents()
+    {
+        foreach (Student student in _students)
+        {
+            Console.WriteLine($"{student}\n");
+        }
+        Console.WriteLine($"List has: {_students.Count} students");
+    }
+
+    
+    /// Displays the percentage of students by academic level.
+    public void DisplayLevelByPercent()
+    {
+        var levelDistribution = _students
+            .GroupBy(s => s.Level)
+            .Select(g => new
+            {
+                Level = g.Key,
+                Percentage = (double)g.Count() / _students.Count * 100
+            });
+
+        foreach (var item in levelDistribution)
+        {
+            Console.WriteLine($"Level {item.Level}: {item.Percentage:F2}%");
+        }
+    }
+
+    
+    /// Displays the percentage of students by GPA.
+    public void DisplayGpaByPercent()
+    {
+        var gpaDistribution = _students
+            .GroupBy(s => s.Gpa)
+            .Select(g => new
+            {
+                Gpa = g.Key,
+                Percentage = (double)g.Count() / _students.Count * 100
+            })
+            .OrderBy(g => g.Gpa);
+
+        foreach (var item in gpaDistribution)
+        {
+            Console.WriteLine($"GPA {item.Gpa:F1}: {item.Percentage:F2}%");
+        }
+    }
+
+    
+    /// Displays students matching the specified academic level.
+    
+    public void DisplayLevelFromKeyboard()
+    {
+        try
+        {
+            string input = GetInput(
+                "Please enter Level (Kem/Yeu/TrungBinh/Kha/Gioi/XuatSac): ",
+                Validation.CheckLevelInput);
+
+            Student.StudentLevel level = Enum.Parse<Student.StudentLevel>(input, true);
+            var matchingStudents = _students.Where(s => s.Level == level).ToList();
+
+            if (!matchingStudents.Any())
+            {
+                Console.WriteLine("No students found for the specified level.\n");
                 return;
             }
 
-            Student.StudentID--;
-            students.Remove(studentDeleted);
-            Console.WriteLine("|---------------------------------|");
-            Console.WriteLine("|--Deleted student successfully--|");
-            Console.WriteLine("|---------------------------------|");
-            Console.WriteLine("\n--Student remaining--\n");
-            DisplayAllStudents();
-            StoreDataInFile();
-            return;
-        }
-    }
-
-//DisplayAllStudent
-    public void DisplayAllStudents()
-    {
-        foreach (Student student in students)
-        {
-            Console.WriteLine(student.ToString() + "\n");
-            
-        }
-        Console.WriteLine($"List have : {students.Count} students");  
-    }
-
-//DisplayLevelbyLevel
-    public void DisplayLevelbyPercent()
-    {
-        var studentLevel = students.GroupBy(x => x.Level)
-            .Select(gr => new
-                {
-                    level = gr.Key,
-                    percent = (double)gr.Count() / students.Count() * 100
-                }
-            );
-        foreach (var item in studentLevel)
-        {
-            Console.WriteLine($"Level {item.level}: {item.percent}%");
-        }
-    }
-
-//DisplayGPAbyPercent
-    public void DisplayGPAbyPercent()
-    {
-        SortedDictionary<double, double> scorePercent = new SortedDictionary<double, double>();
-        foreach (var item in students)
-        {
-            if (scorePercent.ContainsKey(item.GPA))
+            foreach (var student in matchingStudents)
             {
-                scorePercent[item.GPA]++;
-            }
-            else
-            {
-                scorePercent.Add(item.GPA, 1);
+                Console.WriteLine($"Name: {student.Name} with GPA: {student.Gpa}\n");
             }
         }
-
-        foreach (var item in scorePercent)
+        catch (ArgumentException)
         {
-            Console.WriteLine($"GPA: {item.Key}: {item.Value / students.Count * 100}%");
+            Console.WriteLine("Invalid level entered.\n");
         }
     }
 
-//displayLevelFromkeyboard
-    public void DisplayLevelFromKeyBoard()
-    {
-        
-            try
-            {
-                string input = getInput("Please enter Level (Kem/Yeu/TrungBinh/Kha/Gioi/XuatSac):",
-                    Validation.CheckLevelInput);
-
-                // Parse the enum with explicit type specification
-                Student.StudentLevel studyLevelInput =
-                    (Student.StudentLevel)Enum.Parse(typeof(Student.StudentLevel), input, true);
-                var matchingStudents = students.Where(x => x.Level == studyLevelInput);
-                if (!matchingStudents.Any())
-                {
-                    Console.WriteLine("Student not found.\n");
-                }
-                else
-                {
-                    foreach (var item in matchingStudents)
-                    {
-                        Console.WriteLine($"Name: {item.Name} with GPA: {item.GPA}\n");
-                    }
-                }
-            }
-            catch (ArgumentException)
-            {
-                Console.WriteLine("Invalid input: Please enter a valid input.\n");
-            }
-        
-    }
-
-//storeData    
+    
+    /// Saves the student list to a JSON file.
     public void StoreDataInFile()
     {
         try
         {
-            string directory = Path.GetDirectoryName(FilePath);
+            string directory = Path.GetDirectoryName(_filePath)!;
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            string json = JsonSerializer.Serialize(students, new JsonSerializerOptions
-            {
-                WriteIndented = true // để format đẹp
-            });
-
-            File.WriteAllText(FilePath, json);
-
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(_students, options);
+            File.WriteAllText(_filePath, json);
             Console.WriteLine("Data saved successfully.");
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Error: Cannot save file - {e.Message}");
+            Console.WriteLine($"Error saving file: {ex.Message}");
         }
     }
-
     
-//readFile
-    public List<Student> ReadJsonFile(string path)
+    /// Loads the student list from a JSON file.
+    public List<Student>? ReadJsonFile(string filepath)
     {
         try
         {
-            if (File.Exists(FilePath))
-            {
-                string json = File.ReadAllText(path);
-                students = JsonSerializer.Deserialize<List<Student>>(json);
-                 Console.WriteLine("|-----------------------------|");
-                 Console.WriteLine("|--Data loaded successfully.--|");
-                 Console.WriteLine("|-----------------------------|\n");
-                 foreach (Student student in students)
-                 {
-                     Console.WriteLine(student.ToString() + "\n");
-                 } 
-                
-            }
-            else
+            if (!File.Exists(filepath))
             {
                 Console.WriteLine("File not found.");
+                return null;
             }
+
+            string json = File.ReadAllText(filepath);
+            _students.Clear();
+            _students.AddRange(JsonSerializer.Deserialize<List<Student>>(json) ?? []);
+            PrintSuccessMessage("Data loaded successfully");
+            DisplayAllStudents();
+            return _students;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Error: Cannot load file - {e.Message}");
+            Console.WriteLine($"Error loading file: {ex.Message}");
             return null;
         }
-        return  students;
     }
-//getInput
-       public string getInput(string promt, Func<string, Response> validator)
-       {
-        string input=null;
-        while (true)
+
+
+    private Student InputStudent()
+    {
+        string name = GetInput("Please enter name: ", Validation.CheckNameInput);
+        string birthDate = GetInput("Please enter birth date: ", Validation.CheckBirthDateInput);
+        string address = GetInput("Please enter address: ", Validation.CheckAddressInput);
+        string height = GetInput("Please enter height: ", Validation.CheckHeightInput);
+        string weight = GetInput("Please enter weight: ", Validation.CheckWeightInput);
+        string school = GetInput("Please enter school: ", Validation.CheckSchoolInput);
+        string yearStart = GetInput("Please enter year start: ", Validation.CheckStartYearInput);
+        string gpa = GetInput("Please enter GPA: ", Validation.CheckGpaInput);
+
+        return new Student(
+            name,
+            DateTime.ParseExact(birthDate, ConstValue.FormatBirth, CultureInfo.InvariantCulture),
+            address,
+            double.Parse(height, CultureInfo.InvariantCulture),
+            double.Parse(weight, CultureInfo.InvariantCulture),
+            school,
+            int.Parse(yearStart),
+            double.Parse(gpa, CultureInfo.InvariantCulture));
+    }
+
+    private static void UpdateStudentFields(Student target, Student source)
+    {
+        target.Name = source.Name;
+        target.BirthDate = source.BirthDate;
+        target.Address = source.Address;
+        target.Height = source.Height;
+        target.Weight = source.Weight;
+        target.StudentSchool = source.StudentSchool;
+        target.YearStart = source.YearStart;
+        target.Gpa = source.Gpa;
+    }
+
+    private static void PrintSuccessMessage(string message, string? additionalInfo = null)
+    {
+        Console.WriteLine("|--------------------------------|");
+        Console.WriteLine($"|--{message}--|");
+        Console.WriteLine("|--------------------------------|\n");
+        if (!string.IsNullOrEmpty(additionalInfo))
         {
-            Console.Write(promt);
-            input = Console.ReadLine()?.Trim();
-            Response resultresponse = validator(input);
-            if(resultresponse.Success)
-                return input;
-                Console.WriteLine(resultresponse.ToString());
+            Console.WriteLine($"{additionalInfo}\n");
         }
-      }
+    }
 }

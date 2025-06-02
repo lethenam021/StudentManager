@@ -1,38 +1,26 @@
 [
   {
     "StudentCode": "0000020221",
-    "StudentSchool": "Fpt",
+    "StudentSchool": "fpt",
     "YearStart": 2022,
-    "GPA": 7,
+    "Gpa": 10,
     "Id": 1,
-    "Name": "Le The Nam",
-    "BirthDate": "2004-08-06T00:00:00",
-    "Address": "Thanh Hoa",
-    "Height": 172,
-    "Weight": 58
+    "Name": "lanam",
+    "BirthDate": "2003-04-01T00:00:00",
+    "Address": "thnah hoa",
+    "Height": 180,
+    "Weight": 122
   },
   {
     "StudentCode": "0000020192",
     "StudentSchool": "PCCC",
     "YearStart": 2019,
-    "GPA": 7,
+    "Gpa": 7,
     "Id": 2,
     "Name": "Le The Dat",
     "BirthDate": "2000-12-01T00:00:00",
     "Address": "Thanh Hoa",
     "Height": 172,
     "Weight": 76
-  },
-  {
-    "StudentCode": "0000020204",
-    "StudentSchool": "wufeei",
-    "YearStart": 2020,
-    "GPA": 8.8,
-    "Id": 3,
-    "Name": "ufgy",
-    "BirthDate": "1999-01-10T00:00:00",
-    "Address": "gwygda",
-    "Height": 128,
-    "Weight": 23
   }
 ]
